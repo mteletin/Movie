@@ -1,0 +1,192 @@
+<title>Long Dusk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=Zen+Kaku+Gothic+New:wght@400;500&display=swap">
+<style>
+/* Layout: a projection room — the frame is a 16:9 screen floating in black; everything else recedes. */
+:root {
+  --void: #050507;          /* the room */
+  --ivory: #ece4d2;         /* subtitle and title ink, warm like a projector bulb */
+  --ash: #8f8a80;           /* secondary text */
+  --dusk: #6d5a8c;          /* long-dusk violet, the accent */
+  --ember: #d9924a;         /* emergency amber, used for one thing: progress */
+  --panel: rgba(12, 11, 16, 0.78);
+  --serif: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif;
+  --sans: "Zen Kaku Gothic New", "Hiragino Sans", "Segoe UI", system-ui, sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--void); color: var(--ivory); font-family: var(--sans); overflow: hidden; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 1px solid var(--ivory); outline-offset: 3px; }
+
+/* ---------- start screen ---------- */
+#start {
+  position: fixed; inset: 0; display: grid; place-items: center; padding-inline: 16px;
+  background:
+    radial-gradient(120% 70% at 50% 120%, rgba(217,146,74,0.20), transparent 60%),
+    radial-gradient(90% 60% at 50% 110%, rgba(109,90,140,0.35), transparent 70%),
+    var(--void);
+}
+.marquee { display: grid; gap: 1.6rem; justify-items: center; text-align: center; max-width: 34rem; }
+.marquee .jp { font-family: var(--serif); font-size: clamp(1rem, 2.4vw, 1.25rem); letter-spacing: 1.2em; padding-left: 1.2em; color: var(--ash); }
+.marquee h1 {
+  margin: 0; font-family: var(--serif); font-weight: 800; line-height: 0.95;
+  font-size: clamp(3rem, 12vw, 7.5rem); letter-spacing: 0.08em; text-wrap: balance;
+}
+.marquee .logline { font-family: var(--serif); font-size: clamp(0.95rem, 2.2vw, 1.1rem); line-height: 1.7; color: #cfc7b6; max-width: 30rem; }
+.marquee .meta { font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ash); }
+.btns { display: flex; gap: 0.8rem; flex-wrap: wrap; justify-content: center; }
+.go {
+  border: 1px solid rgba(236,228,210,0.5); background: transparent; padding: 0.85rem 2.4rem;
+  font-family: var(--serif); font-size: 1.05rem; letter-spacing: 0.3em; text-transform: uppercase; cursor: pointer;
+  transition: background .3s, color .3s;
+}
+.go:hover { background: var(--ivory); color: var(--void); }
+.go.quiet { border-color: rgba(236,228,210,0.2); color: var(--ash); letter-spacing: 0.12em; font-size: 0.85rem; }
+.hint { font-size: 0.72rem; color: #67635c; letter-spacing: 0.06em; }
+.planet {
+  position: absolute; left: 50%; bottom: -78vmin; width: 110vmin; height: 110vmin; transform: translateX(-50%);
+  border-radius: 50%; pointer-events: none; opacity: 0.55;
+  background:
+    repeating-linear-gradient(176deg, rgba(0,0,0,0) 0 3.5%, rgba(80,40,70,0.25) 3.5% 5%, rgba(0,0,0,0) 5% 8.5%),
+    radial-gradient(circle at 50% 18%, #c88a52 0%, #7b4a5e 38%, #2a1b2e 70%);
+  box-shadow: 0 0 120px rgba(217,146,74,0.18);
+}
+
+/* ---------- stage ---------- */
+#stage { position: fixed; inset: 0; background: #000; }
+#stage.nocursor { cursor: none; }
+#screen { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#screenHit { position: absolute; inset: 0; }
+#overlay { position: absolute; pointer-events: none; overflow: hidden; }
+
+#subs { position: absolute; left: 6%; right: 6%; bottom: 7%; text-align: center; }
+#subs .line {
+  font-family: var(--serif); font-weight: 600; font-size: 1.32em; line-height: 1.35; color: #f4eedf;
+  text-shadow: 0 0 2px #000, 0 0 3px #000, 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 0 2px 8px rgba(0,0,0,.8);
+  text-wrap: balance;
+}
+#subs .line.it .tx { font-style: italic; }
+#subs .line.sfxcap { color: #bdb6a6; font-weight: 400; font-size: 1.1em; }
+#subs .who {
+  display: block; font-family: var(--sans); font-weight: 500; font-size: 0.5em; letter-spacing: 0.32em; margin-bottom: 0.15em; opacity: 0.9;
+}
+
+#card { position: absolute; inset: 0; opacity: 0; }
+#card div { text-shadow: 0 0 12px rgba(0,0,0,.7); }
+.card-location { display: flex; align-items: flex-end; padding: 0 0 7% 5%; }
+.card-location div {
+  font-family: var(--sans); font-size: 0.78em; letter-spacing: 0.34em; text-transform: uppercase; color: #e8e0cc;
+  border-left: 1px solid rgba(232,224,204,.6); padding-left: 0.9em;
+}
+.card-title, .card-act, .card-end, .card-chapter { display: grid; place-content: center; text-align: center; gap: 0.8em; }
+.card-title .t-en { font-family: var(--serif); font-weight: 800; font-size: 4.2em; letter-spacing: 0.14em; }
+.card-title .t-jp { font-family: var(--serif); font-size: 1.25em; letter-spacing: 1.4em; padding-left: 1.4em; color: #d6cdb8; }
+.card-act .a-jp { font-family: var(--serif); font-weight: 600; font-size: 2.6em; letter-spacing: 0.5em; padding-left: .5em; }
+.card-act .a-en { font-family: var(--sans); font-size: 0.8em; letter-spacing: 0.5em; color: #bfb7a5; text-transform: uppercase; }
+.card-chapter div { font-family: var(--serif); font-size: 1.3em; letter-spacing: 0.3em; }
+.card-end .e-jp { font-family: var(--serif); font-weight: 800; font-size: 3.6em; }
+
+#credits { position: absolute; left: 0; right: 0; top: 0; display: grid; gap: 1.1em; justify-items: center; text-align: center; padding-inline: 8%; }
+.cr-big { font-family: var(--serif); font-weight: 800; font-size: 3em; letter-spacing: .14em; }
+.cr-jp { font-family: var(--serif); font-size: 1.2em; letter-spacing: 1.2em; padding-left: 1.2em; color: #cfc6b2; margin-bottom: 2em; }
+.cr-row { display: grid; gap: .25em; }
+.cr-row span:first-child { font-size: .7em; letter-spacing: .3em; text-transform: uppercase; color: var(--ash); }
+.cr-row span:last-child { font-family: var(--serif); font-size: 1.15em; }
+.cr-row.it span:last-child { font-style: italic; color: #d9cfb8; }
+.cr-row.small span:last-child { font-size: .8em; color: var(--ash); }
+.cr-gap { height: 1.6em; }
+
+/* ---------- controls ---------- */
+#ui {
+  position: absolute; left: 0; right: 0; bottom: 0; opacity: 0; transition: opacity .5s;
+  padding: 2.6rem 16px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(transparent, rgba(0,0,0,.85));
+}
+#ui.show { opacity: 1; }
+#bar { position: relative; height: 16px; cursor: pointer; touch-action: none; }
+#bar::before { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 2px; background: rgba(236,228,210,.18); }
+#barFill { position: absolute; left: 0; top: 7px; height: 2px; background: var(--ember); box-shadow: 0 0 8px rgba(217,146,74,.6); }
+#barMarks i { position: absolute; top: 5px; width: 1px; height: 6px; background: rgba(236,228,210,.35); }
+.row { display: flex; align-items: center; gap: 0.4rem 1rem; flex-wrap: wrap; margin-top: 0.4rem; font-size: 0.82rem; }
+.row button {
+  background: none; border: 0; padding: 0.35rem 0.2rem; cursor: pointer; color: #d8d0bf; letter-spacing: .08em;
+}
+.row button:hover { color: #fff; }
+.row button[aria-pressed="false"] { color: #6b675f; text-decoration: line-through; }
+#play { font-family: var(--serif); font-weight: 600; min-width: 3.6em; text-align: left; }
+#time { font-variant-numeric: tabular-nums; color: var(--ash); }
+#chapterName { flex: 1 1 12rem; min-width: 0; color: #bdb5a3; font-family: var(--serif); letter-spacing: .1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#vol { width: 80px; accent-color: var(--ember); }
+
+#chapters {
+  position: absolute; right: 16px; bottom: 5.6rem; width: min(22rem, calc(100% - 32px)); max-height: 62vh; overflow-y: auto;
+  background: var(--panel); backdrop-filter: blur(10px); border: 1px solid rgba(236,228,210,.12);
+  padding: 0.6rem; display: none;
+}
+#chapters.open { display: block; }
+.ch-act { font-size: .68rem; letter-spacing: .24em; color: var(--ash); padding: .8rem .5rem .3rem; text-transform: uppercase; }
+.ch-act span { font-family: var(--serif); letter-spacing: .3em; color: #b8a9cf; }
+#chapters button {
+  display: flex; gap: .9rem; width: 100%; text-align: left; background: none; border: 0; cursor: pointer;
+  padding: .45rem .5rem; font-family: var(--serif); font-size: .95rem; color: #ddd5c4;
+}
+#chapters button:hover { background: rgba(236,228,210,.06); }
+#chapters button.on { color: var(--ember); }
+.ch-t { font-family: var(--sans); font-size: .75rem; color: var(--ash); font-variant-numeric: tabular-nums; min-width: 2.8rem; padding-top: .15rem; }
+
+@media (max-width: 560px) {
+  #vol, #back, #fwd { display: none; }
+  .card-title .t-en { font-size: 2.6em; }
+}
+@media (prefers-reduced-motion: reduce) { #ui { transition: none; } }
+</style>
+
+<section id="start">
+  <div class="planet" aria-hidden="true"></div>
+  <div class="marquee">
+    <div class="jp">長い黄昏</div>
+    <h1>LONG DUSK</h1>
+    <p class="logline">Vesper has no sun. Its daylight is a ring of mirrors, and the mirrors belong to the admiralty. Twelve years after Callisto Gap, the treaty is up for renewal.</p>
+    <div class="meta" id="runtime">—</div>
+    <div class="btns">
+      <button class="go" id="beginBtn" type="button">Begin</button>
+      <button class="go quiet" id="resumeBtn" type="button" hidden>Resume</button>
+    </div>
+    <div class="hint">Sound on. Headphones help. Space pauses · ← → skip · F fullscreen · C chapters</div>
+  </div>
+</section>
+
+<main id="stage" hidden>
+  <canvas id="screen"></canvas>
+  <div id="screenHit"></div>
+  <div id="overlay">
+    <div id="card"></div>
+    <div id="credits" hidden></div>
+    <div id="subs" aria-live="polite"></div>
+  </div>
+  <nav id="chapters" aria-label="Chapters"></nav>
+  <div id="ui">
+    <div id="bar" role="slider" aria-label="Seek"><div id="barMarks"></div><div id="barFill"></div></div>
+    <div class="row">
+      <button id="play" type="button">Play</button>
+      <button id="back" type="button" aria-label="Back 10 seconds">−10</button>
+      <button id="fwd" type="button" aria-label="Forward 10 seconds">+10</button>
+      <span id="time">0:00</span>
+      <span id="chapterName"></span>
+      <button id="subBtn" type="button" aria-pressed="true">Subtitles</button>
+      <button id="nameBtn" type="button" aria-pressed="true">Names</button>
+      <button id="chBtn" type="button">Chapters</button>
+      <input id="vol" type="range" min="0" max="1.2" step="0.01" value="0.9" aria-label="Volume">
+      <button id="fsBtn" type="button">Fullscreen</button>
+    </div>
+  </div>
+</main>
+
+<script src="music.js"></script>
+<script src="shots_env.js"></script>
+<script src="shots_chars.js"></script>
+<script src="script_a.js"></script>
+<script src="script_b.js"></script>
+<script src="engine.js"></script>
