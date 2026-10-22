@@ -349,7 +349,8 @@
   function seek(T) {
     state.T = Math.max(0, Math.min(total - 0.01, T));
     state.sceneIdx = sceneAt(state.T);
-    lastSubKey = lastCardKey = null;
+    // undefined, not null: null means "nothing showing" and would skip clearing a stale card
+    lastSubKey = lastCardKey = undefined;
     resyncMusic();
     updateChapter();
     persist();
